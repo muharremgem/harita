@@ -304,14 +304,37 @@
                      // Eczane verilerini CSV'den yükle
                      function fetchPharmacyData()
                      {
-                            fetch('kiperin-collagen-turkiye.myshopify.com-store.csv')
+                            // Doğru GitHub raw URL formatı
+                            const csvUrl = 'https://raw.githubusercontent.com/muharremgem/harita/main/kiperin-collagen-turkiye.myshopify.com-store.csv';
+
+                            // CORS hatalarını önlemek için proxy kullanma seçeneği
+                            const corsProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(csvUrl);
+
+                            // Önce direkt URL'i dene, hata alırsa proxy kullan lütfen asd6546
+
+                            
+                            fetch(csvUrl)
                                    .then(response =>
                                    {
                                           if (!response.ok)
                                           {
-                                                 throw new Error("CSV dosyası yüklenemedi");
+                                                 throw new Error("CSV dosyası direkt yüklenemedi, proxy deneniyor");
                                           }
                                           return response.text();
+                                   })
+                                   .catch(error =>
+                                   {
+                                          console.warn("Direkt erişimde hata, proxy deneniyor:", error);
+                                          // CORS hatası varsa proxy URL ile tekrar dene
+                                          return fetch(corsProxyUrl)
+                                                 .then(response =>
+                                                 {
+                                                        if (!response.ok)
+                                                        {
+                                                               throw new Error("Proxy ile de CSV dosyası yüklenemedi");
+                                                        }
+                                                        return response.text();
+                                                 });
                                    })
                                    .then(data =>
                                    {
