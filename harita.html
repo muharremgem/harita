@@ -203,11 +203,14 @@
               <h1 class="page-title">Kiperin Eczanelerimiz</h1>
 
               <div class="map-container">
-                     <img src="türkiye.jpg" alt="Türkiye Haritası" class="map-image" style="width: 50%; height: auto;">
+                     <img src="https://cdn.shopify.com/s/files/1/0586/1910/1363/files/Eczanelerimiz.jpg?v=1746695680"
+                            alt="Türkiye Haritası" class="map-image" style="width: 100%; height: auto;">
               </div>
 
               <div class="search-container">
-                     <h2 class="search-title">En Yakın Eczaneyi Bul</h2>
+                     <h2 class="search-title" style="text-transform: capitalize;">Sizlere En Yakın Eczaneyi Bulalım 🤗
+                     </h2>
+
                      <div class="search-form">
                             <div class="form-group">
                                    <label for="city">İl</label>
@@ -312,7 +315,7 @@
 
                             // Önce direkt URL'i dene, hata alırsa proxy kullan lütfen asd6546
 
-                            
+
                             fetch(csvUrl)
                                    .then(response =>
                                    {
@@ -586,6 +589,9 @@
 
                                    return true;
                             });
+
+                            // Eczaneleri alfabetik olarak sırala
+                            filteredPharmacies.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
                             console.log(`${filteredPharmacies.length} eczane bulundu`);
 
