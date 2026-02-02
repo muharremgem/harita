@@ -1,692 +1,758 @@
 <!DOCTYPE html>
 <html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eczane Arama</title>
+    <style>
+      :root {
+        --primary-color: #06aff2;
+        --secondary-color: #f6f6f6;
+        --text-color: #333;
+        --border-color: #ddd;
+      }
 
-<head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>Eczane Arama</title>
-       <style>
-              :root {
-                     --primary-color: #06AFF2;
-                     --secondary-color: #f6f6f6;
-                     --text-color: #333;
-                     --border-color: #ddd;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        color: var(--text-color);
+        background-color: #fff;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .page-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: var(--primary-color);
+      }
+
+      .map-container {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .map-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-container {
+        background-color: var(--secondary-color);
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .search-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+      }
+
+      .search-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-end;
+      }
+
+      .form-group {
+        flex: 1 1 200px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      .form-group select,
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: #fff;
+        font-size: 16px;
+      }
+
+      .search-button {
+        padding: 12px 30px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        flex: 0 0 auto;
+      }
+
+      .search-button:hover {
+        background-color: #06aff2;
+      }
+
+      .results-container {
+        margin-top: 40px;
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #666;
+        display: none;
+      }
+
+      .pharmacy-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+      }
+
+      .pharmacy-card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .pharmacy-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .pharmacy-name {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+
+      .pharmacy-address,
+      .pharmacy-location,
+      .pharmacy-phone {
+        margin-bottom: 8px;
+      }
+
+      .load-more {
+        display: block;
+        margin: 30px auto 0;
+        padding: 10px 25px;
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s;
+        text-align: center;
+        max-width: 200px;
+      }
+
+      .load-more:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Responsive tasarım */
+      @media (max-width: 768px) {
+        .search-form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .form-group {
+          flex: 1 1 100%;
+        }
+
+        .pharmacy-list {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 class="page-title">Kiperin Eczanelerimiz</h1>
+
+      <div class="map-container">
+        <img
+          src="https://cdn.shopify.com/s/files/1/0586/1910/1363/files/Eczanelerimiz.jpg?v=1746695680"
+          alt="Türkiye Haritası"
+          class="map-image"
+          style="width: 100%; height: auto"
+        />
+      </div>
+
+      <div class="search-container">
+        <h2 class="search-title" style="text-transform: capitalize">
+          Sizlere En Yakın Eczaneyi Bulalım 🤗
+        </h2>
+
+        <div class="search-form">
+          <div class="form-group">
+            <label for="city">İl</label>
+            <select id="city">
+              <option value="">Seçiniz</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="district">İlçe</label>
+            <select id="district">
+              <option value="">Seçiniz</option>
+            </select>
+          </div>
+          <button type="button" class="search-button" id="searchButton">
+            ARA
+          </button>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <div class="no-results" id="noResults">
+          Arama kriterlerinize uygun eczane bulunamadı.
+        </div>
+        <div class="pharmacy-list" id="pharmacyList"></div>
+        <button type="button" class="load-more hidden" id="loadMoreButton">
+          Daha Fazla
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Sabitler
+        const ITEMS_PER_PAGE = 6;
+
+        // DOM Elementleri
+        const citySelect = document.getElementById("city");
+        const districtSelect = document.getElementById("district");
+        const searchButton = document.getElementById("searchButton");
+        const pharmacyList = document.getElementById("pharmacyList");
+        const noResults = document.getElementById("noResults");
+        const loadMoreButton = document.getElementById("loadMoreButton");
+
+        // Uygulama Verisi
+        let allPharmacies = [];
+        let filteredPharmacies = [];
+        let currentPage = 1;
+        let cities = {};
+
+        // Statik il listesi - CSV hatası durumunda kullanılacak
+        const TurkiyeIlleri = [
+          "ADANA",
+          "ADIYAMAN",
+          "AFYONKARAHİSAR",
+          "AĞRI",
+          "AMASYA",
+          "ANKARA",
+          "ANTALYA",
+          "ARTVİN",
+          "AYDIN",
+          "BALIKESİR",
+          "BİLECİK",
+          "BİNGÖL",
+          "BİTLİS",
+          "BOLU",
+          "BURDUR",
+          "BURSA",
+          "ÇANAKKALE",
+          "ÇANKIRI",
+          "ÇORUM",
+          "DENİZLİ",
+          "DİYARBAKIR",
+          "EDİRNE",
+          "ELAZIĞ",
+          "ERZİNCAN",
+          "ERZURUM",
+          "ESKİŞEHİR",
+          "GAZİANTEP",
+          "GİRESUN",
+          "GÜMÜŞHANE",
+          "HAKKARİ",
+          "HATAY",
+          "ISPARTA",
+          "MERSİN",
+          "İSTANBUL",
+          "İZMİR",
+          "KARS",
+          "KASTAMONU",
+          "KAYSERİ",
+          "KIRKLARELİ",
+          "KIRŞEHİR",
+          "KOCAELİ",
+          "KONYA",
+          "KÜTAHYA",
+          "MALATYA",
+          "MANİSA",
+          "KAHRAMANMARAŞ",
+          "MARDİN",
+          "MUĞLA",
+          "MUŞ",
+          "NEVŞEHİR",
+          "NİĞDE",
+          "ORDU",
+          "RİZE",
+          "SAKARYA",
+          "SAMSUN",
+          "SİİRT",
+          "SİNOP",
+          "SİVAS",
+          "TEKİRDAĞ",
+          "TOKAT",
+          "TRABZON",
+          "TUNCELİ",
+          "ŞANLIURFA",
+          "UŞAK",
+          "VAN",
+          "YOZGAT",
+          "ZONGULDAK",
+          "AKSARAY",
+          "BAYBURT",
+          "KARAMAN",
+          "KIRIKKALE",
+          "BATMAN",
+          "ŞIRNAK",
+          "BARTIN",
+          "ARDAHAN",
+          "IĞDIR",
+          "YALOVA",
+          "KARABÜK",
+          "KİLİS",
+          "OSMANİYE",
+          "DÜZCE",
+        ];
+
+        // Sık kullanılan ilçeler - CSV'de ilçe bilgisi eksikse kullanılacak
+        const YayginIlceler = [
+          "MERKEZ",
+          "BAĞCILAR",
+          "BAKIRKÖY",
+          "BEŞİKTAŞ",
+          "KADIKÖY",
+          "KARTAL",
+          "MALTEPE",
+          "PENDİK",
+          "ŞİŞLİ",
+          "ÜSKÜDAR",
+        ];
+
+        // TÜM İLLERİ MANUEL OLARAK EKLE
+        function setupCitySelect() {
+          // Önce statik il listesini ekle
+          citySelect.innerHTML = '<option value="">Seçiniz</option>';
+
+          TurkiyeIlleri.forEach((city) => {
+            const option = document.createElement("option");
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+
+            // İl için boş bir ilçe seti oluştur
+            if (!cities[city]) {
+              cities[city] = new Set();
+            }
+          });
+
+          // CSV yüklendiğinde bu illere ilçeler eklenecek
+        }
+
+        // Sayfayı başlat - Önce statik olarak illeri yükle, ardından CSV'den veri çek
+        setupCitySelect();
+
+        // Daha sonra CSV verilerini yükle
+        fetchPharmacyData();
+
+        // Olay dinleyicileri
+        citySelect.addEventListener("change", updateDistricts);
+        searchButton.addEventListener("click", searchPharmacies);
+        loadMoreButton.addEventListener("click", loadMorePharmacies);
+
+        // Eczane verilerini CSV'den yükle
+        function fetchPharmacyData() {
+          // Doğru GitHub raw URL formatı - ?t= ile önbellek bypass (güncel liste için)
+          const csvUrl =
+            "https://raw.githubusercontent.com/muharremgem/harita/main/kiperin-collagen-turkiye.myshopify.com-store.csv?t=" +
+            Date.now();
+
+          // CORS hatalarını önlemek için proxy kullanma seçeneği
+          const corsProxyUrl =
+            "https://api.allorigins.win/raw?url=" +
+            encodeURIComponent(
+              "https://raw.githubusercontent.com/muharremgem/harita/main/kiperin-collagen-turkiye.myshopify.com-store.csv?t=" +
+                Date.now(),
+            );
+
+          // Önce direkt URL'i dene, hata alırsa proxy kullan lütfen asd6546
+
+          fetch(csvUrl)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "CSV dosyası direkt yüklenemedi, proxy deneniyor",
+                );
               }
-
-              * {
-                     margin: 0;
-                     padding: 0;
-                     box-sizing: border-box;
-                     font-family: 'Arial', sans-serif;
-              }
-
-              body {
-                     color: var(--text-color);
-                     background-color: #fff;
-                     line-height: 1.6;
-              }
-
-              .container {
-                     max-width: 1200px;
-                     margin: 0 auto;
-                     padding: 20px;
-              }
-
-              .page-title {
-                     text-align: center;
-                     margin-bottom: 30px;
-                     color: var(--primary-color);
-              }
-
-              .map-container {
-                     margin-bottom: 40px;
-                     text-align: center;
-              }
-
-              .map-image {
-                     max-width: 100%;
-                     height: auto;
-                     border-radius: 8px;
-                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-              }
-
-              .search-container {
-                     background-color: var(--secondary-color);
-                     padding: 30px;
-                     border-radius: 8px;
-                     margin-bottom: 40px;
-                     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-              }
-
-              .search-title {
-                     text-align: center;
-                     margin-bottom: 20px;
-                     font-size: 1.5rem;
-                     color: var(--primary-color);
-              }
-
-              .search-form {
-                     display: flex;
-                     flex-wrap: wrap;
-                     gap: 20px;
-                     justify-content: center;
-                     align-items: flex-end;
-              }
-
-              .form-group {
-                     flex: 1 1 200px;
-              }
-
-              .form-group label {
-                     display: block;
-                     margin-bottom: 8px;
-                     font-weight: bold;
-              }
-
-              .form-group select,
-              .form-group input {
-                     width: 100%;
-                     padding: 12px;
-                     border: 1px solid var(--border-color);
-                     border-radius: 4px;
-                     background-color: #fff;
-                     font-size: 16px;
-              }
-
-              .search-button {
-                     padding: 12px 30px;
-                     background-color: var(--primary-color);
-                     color: white;
-                     border: none;
-                     border-radius: 4px;
-                     cursor: pointer;
-                     font-size: 16px;
-                     font-weight: bold;
-                     transition: background-color 0.3s;
-                     flex: 0 0 auto;
-              }
-
-              .search-button:hover {
-                     background-color: #06AFF2;
-              }
-
-              .results-container {
-                     margin-top: 40px;
-              }
-
-              .no-results {
-                     text-align: center;
-                     padding: 20px;
-                     font-style: italic;
-                     color: #666;
-                     display: none;
-              }
-
-              .pharmacy-list {
-                     display: grid;
-                     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-                     gap: 20px;
-              }
-
-              .pharmacy-card {
-                     border: 1px solid var(--border-color);
-                     border-radius: 8px;
-                     padding: 20px;
-                     background-color: white;
-                     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-                     transition: transform 0.3s, box-shadow 0.3s;
-              }
-
-              .pharmacy-card:hover {
-                     transform: translateY(-3px);
-                     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-              }
-
-              .pharmacy-name {
-                     color: var(--primary-color);
-                     font-size: 1.2rem;
-                     margin-bottom: 10px;
-                     border-bottom: 1px solid var(--border-color);
-                     padding-bottom: 10px;
-              }
-
-              .pharmacy-address,
-              .pharmacy-location,
-              .pharmacy-phone {
-                     margin-bottom: 8px;
-              }
-
-              .load-more {
-                     display: block;
-                     margin: 30px auto 0;
-                     padding: 10px 25px;
-                     background-color: var(--secondary-color);
-                     color: var(--primary-color);
-                     border: 1px solid var(--primary-color);
-                     border-radius: 4px;
-                     cursor: pointer;
-                     font-size: 16px;
-                     transition: all 0.3s;
-                     text-align: center;
-                     max-width: 200px;
-              }
-
-              .load-more:hover {
-                     background-color: var(--primary-color);
-                     color: white;
-              }
-
-              .hidden {
-                     display: none;
-              }
-
-              /* Responsive tasarım */
-              @media (max-width: 768px) {
-                     .search-form {
-                            flex-direction: column;
-                            align-items: stretch;
-                     }
-
-                     .form-group {
-                            flex: 1 1 100%;
-                     }
-
-                     .pharmacy-list {
-                            grid-template-columns: 1fr;
-                     }
-              }
-       </style>
-</head>
-
-<body>
-       <div class="container">
-              <h1 class="page-title">Kiperin Eczanelerimiz</h1>
-
-              <div class="map-container">
-                     <img src="https://cdn.shopify.com/s/files/1/0586/1910/1363/files/Eczanelerimiz.jpg?v=1746695680"
-                            alt="Türkiye Haritası" class="map-image" style="width: 100%; height: auto;">
-              </div>
-
-              <div class="search-container">
-                     <h2 class="search-title" style="text-transform: capitalize;">Sizlere En Yakın Eczaneyi Bulalım 🤗
-                     </h2>
-
-                     <div class="search-form">
-                            <div class="form-group">
-                                   <label for="city">İl</label>
-                                   <select id="city">
-                                          <option value="">Seçiniz</option>
-                                   </select>
-                            </div>
-                            <div class="form-group">
-                                   <label for="district">İlçe</label>
-                                   <select id="district">
-                                          <option value="">Seçiniz</option>
-                                   </select>
-                            </div>
-                            <button type="button" class="search-button" id="searchButton">ARA</button>
-                     </div>
-              </div>
-
-              <div class="results-container">
-                     <div class="no-results" id="noResults">Arama kriterlerinize uygun eczane bulunamadı.</div>
-                     <div class="pharmacy-list" id="pharmacyList"></div>
-                     <button type="button" class="load-more hidden" id="loadMoreButton">Daha Fazla</button>
-              </div>
-       </div>
-
-       <script>
-              document.addEventListener('DOMContentLoaded', function ()
-              {
-                     // Sabitler
-                     const ITEMS_PER_PAGE = 6;
-
-                     // DOM Elementleri
-                     const citySelect = document.getElementById('city');
-                     const districtSelect = document.getElementById('district');
-                     const searchButton = document.getElementById('searchButton');
-                     const pharmacyList = document.getElementById('pharmacyList');
-                     const noResults = document.getElementById('noResults');
-                     const loadMoreButton = document.getElementById('loadMoreButton');
-
-                     // Uygulama Verisi
-                     let allPharmacies = [];
-                     let filteredPharmacies = [];
-                     let currentPage = 1;
-                     let cities = {};
-
-                     // Statik il listesi - CSV hatası durumunda kullanılacak
-                     const TurkiyeIlleri = [
-                            "ADANA", "ADIYAMAN", "AFYONKARAHİSAR", "AĞRI", "AMASYA", "ANKARA", "ANTALYA", "ARTVİN", "AYDIN", "BALIKESİR",
-                            "BİLECİK", "BİNGÖL", "BİTLİS", "BOLU", "BURDUR", "BURSA", "ÇANAKKALE", "ÇANKIRI", "ÇORUM", "DENİZLİ",
-                            "DİYARBAKIR", "EDİRNE", "ELAZIĞ", "ERZİNCAN", "ERZURUM", "ESKİŞEHİR", "GAZİANTEP", "GİRESUN", "GÜMÜŞHANE", "HAKKARİ",
-                            "HATAY", "ISPARTA", "MERSİN", "İSTANBUL", "İZMİR", "KARS", "KASTAMONU", "KAYSERİ", "KIRKLARELİ", "KIRŞEHİR",
-                            "KOCAELİ", "KONYA", "KÜTAHYA", "MALATYA", "MANİSA", "KAHRAMANMARAŞ", "MARDİN", "MUĞLA", "MUŞ", "NEVŞEHİR",
-                            "NİĞDE", "ORDU", "RİZE", "SAKARYA", "SAMSUN", "SİİRT", "SİNOP", "SİVAS", "TEKİRDAĞ", "TOKAT", "TRABZON",
-                            "TUNCELİ", "ŞANLIURFA", "UŞAK", "VAN", "YOZGAT", "ZONGULDAK", "AKSARAY", "BAYBURT", "KARAMAN", "KIRIKKALE",
-                            "BATMAN", "ŞIRNAK", "BARTIN", "ARDAHAN", "IĞDIR", "YALOVA", "KARABÜK", "KİLİS", "OSMANİYE", "DÜZCE"
-                     ];
-
-                     // Sık kullanılan ilçeler - CSV'de ilçe bilgisi eksikse kullanılacak
-                     const YayginIlceler = ["MERKEZ", "BAĞCILAR", "BAKIRKÖY", "BEŞİKTAŞ", "KADIKÖY", "KARTAL", "MALTEPE", "PENDİK", "ŞİŞLİ", "ÜSKÜDAR"];
-
-                     // TÜM İLLERİ MANUEL OLARAK EKLE
-                     function setupCitySelect()
-                     {
-                            // Önce statik il listesini ekle
-                            citySelect.innerHTML = '<option value="">Seçiniz</option>';
-
-                            TurkiyeIlleri.forEach(city =>
-                            {
-                                   const option = document.createElement('option');
-                                   option.value = city;
-                                   option.textContent = city;
-                                   citySelect.appendChild(option);
-
-                                   // İl için boş bir ilçe seti oluştur
-                                   if (!cities[city])
-                                   {
-                                          cities[city] = new Set();
-                                   }
-                            });
-
-                            // CSV yüklendiğinde bu illere ilçeler eklenecek
-                     }
-
-                     // Sayfayı başlat - Önce statik olarak illeri yükle, ardından CSV'den veri çek
-                     setupCitySelect();
-
-                     // Daha sonra CSV verilerini yükle
-                     fetchPharmacyData();
-
-                     // Olay dinleyicileri
-                     citySelect.addEventListener('change', updateDistricts);
-                     searchButton.addEventListener('click', searchPharmacies);
-                     loadMoreButton.addEventListener('click', loadMorePharmacies);
-
-                     // Eczane verilerini CSV'den yükle
-                     function fetchPharmacyData()
-                     {
-                            // Doğru GitHub raw URL formatı
-                            const csvUrl = 'https://raw.githubusercontent.com/muharremgem/harita/main/kiperin-collagen-turkiye.myshopify.com-store.csv';
-
-                            // CORS hatalarını önlemek için proxy kullanma seçeneği
-                            const corsProxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(csvUrl);
-
-                            // Önce direkt URL'i dene, hata alırsa proxy kullan lütfen asd6546
-
-
-                            fetch(csvUrl)
-                                   .then(response =>
-                                   {
-                                          if (!response.ok)
-                                          {
-                                                 throw new Error("CSV dosyası direkt yüklenemedi, proxy deneniyor");
-                                          }
-                                          return response.text();
-                                   })
-                                   .catch(error =>
-                                   {
-                                          console.warn("Direkt erişimde hata, proxy deneniyor:", error);
-                                          // CORS hatası varsa proxy URL ile tekrar dene
-                                          return fetch(corsProxyUrl)
-                                                 .then(response =>
-                                                 {
-                                                        if (!response.ok)
-                                                        {
-                                                               throw new Error("Proxy ile de CSV dosyası yüklenemedi");
-                                                        }
-                                                        return response.text();
-                                                 });
-                                   })
-                                   .then(data =>
-                                   {
-                                          try
-                                          {
-                                                 parseCSV(data);
-                                                 console.log("CSV verisi başarıyla yüklendi");
-                                          } catch (error)
-                                          {
-                                                 console.error("CSV ayrıştırma hatası:", error);
-                                                 // Hata durumunda örnek veriler oluştur
-                                                 createSampleData();
-                                          }
-                                   })
-                                   .catch(error =>
-                                   {
-                                          console.error('Veri yüklenirken hata oluştu:', error);
-                                          // Dosya bulunamadıysa örnek veri oluştur
-                                          createSampleData();
-                                   });
-                     }
-
-                     // Örnek veri oluştur (CSV yüklenemediğinde)
-                     function createSampleData()
-                     {
-                            console.log("Örnek veri oluşturuluyor...");
-                            allPharmacies = [];
-
-                            // Her il için en az bir eczane ve ilçe ekle
-                            TurkiyeIlleri.forEach(il =>
-                            {
-                                   // Her il için bir merkez ilçesi olsun
-                                   cities[il].add("MERKEZ");
-
-                                   // Bazı iller için ek ilçeler
-                                   if (["İSTANBUL", "ANKARA", "İZMİR", "BURSA", "ANTALYA"].includes(il))
-                                   {
-                                          YayginIlceler.forEach(ilce =>
-                                          {
-                                                 cities[il].add(ilce);
-                                          });
-                                   }
-
-                                   // Her il için en az bir eczane
-                                   allPharmacies.push({
-                                          name: `${il} Merkez Eczanesi`,
-                                          address: `${il} MERKEZ`,
-                                          city: il,
-                                          district: "MERKEZ",
-                                          phone: "0555 555 5555"
-                                   });
-
-                                   // Büyük iller için ek eczaneler
-                                   if (["İSTANBUL", "ANKARA", "İZMİR"].includes(il))
-                                   {
-                                          for (let i = 1; i <= 5; i++)
-                                          {
-                                                 const district = YayginIlceler[i % YayginIlceler.length];
-                                                 allPharmacies.push({
-                                                        name: `${il} ${district} Eczanesi ${i}`,
-                                                        address: `${district} Mahallesi, ${il}`,
-                                                        city: il,
-                                                        district: district,
-                                                        phone: `0555 555 ${1000 + i}`
-                                                 });
-                                          }
-                                   }
-                            });
-
-                            console.log(`${allPharmacies.length} örnek eczane oluşturuldu`);
-                     }
-
-                     // CSV verilerini ayrıştır
-                     function parseCSV(csv)
-                     {
-                            const lines = csv.split('\n');
-
-                            // Başlıkları al
-                            const headerLine = lines[0].replace(/\r/g, '');
-                            const headers = headerLine.split(',');
-
-                            // Sütun indekslerini bul
-                            const nameIndex = findIndex(headers, "Location_name");
-                            const addressIndex = findIndex(headers, "Address");
-                            const cityIndex = findIndex(headers, "City");
-                            const phoneIndex = findIndex(headers, "Phone");
-
-                            console.log("Sütun indeksleri:", { nameIndex, addressIndex, cityIndex, phoneIndex });
-
-                            if (nameIndex === -1 || cityIndex === -1)
-                            {
-                                   throw new Error("Gerekli sütunlar bulunamadı");
-                            }
-
-                            // CSV satırlarını işle
-                            for (let i = 1; i < lines.length; i++)
-                            {
-                                   const line = lines[i].replace(/\r/g, '');
-                                   if (!line.trim()) continue;
-
-                                   try
-                                   {
-                                          // Basit CSV ayrıştırma
-                                          const values = parseCSVLine(line);
-
-                                          if (!values || values.length <= Math.max(nameIndex, cityIndex)) continue;
-
-                                          const name = cleanValue(values[nameIndex]);
-                                          const address = addressIndex !== -1 ? cleanValue(values[addressIndex]) : "";
-                                          const city = cleanValue(values[cityIndex]);
-                                          const phone = phoneIndex !== -1 ? cleanValue(values[phoneIndex]) : "";
-
-                                          if (name && city)
-                                          {
-                                                 // Adres yoksa district = city olur
-                                                 const district = address || city;
-
-                                                 // İl ve ilçe bilgisini güncelle
-                                                 if (!cities[city])
-                                                 {
-                                                        cities[city] = new Set();
-                                                 }
-
-                                                 if (district)
-                                                 {
-                                                        cities[city].add(district);
-                                                 }
-
-                                                 // Eczane ekle
-                                                 allPharmacies.push({
-                                                        name,
-                                                        address,
-                                                        city,
-                                                        district,
-                                                        phone
-                                                 });
-                                          }
-                                   } catch (e)
-                                   {
-                                          console.warn(`Satır ${i} ayrıştırılamadı:`, e);
-                                   }
-                            }
-
-                            console.log(`${allPharmacies.length} eczane yüklendi`);
-                     }
-
-                     // Değeri temizle
-                     function cleanValue(value)
-                     {
-                            if (!value) return "";
-                            return value.replace(/^["']|["']$/g, '').trim();
-                     }
-
-                     // Başlıkta indeks bul
-                     function findIndex(headers, name)
-                     {
-                            for (let i = 0; i < headers.length; i++)
-                            {
-                                   const header = headers[i].replace(/^["']|["']$/g, '').trim();
-                                   if (header.toLowerCase() === name.toLowerCase())
-                                   {
-                                          return i;
-                                   }
-                            }
-                            return -1;
-                     }
-
-                     // Basit CSV satır ayrıştırma
-                     function parseCSVLine(line)
-                     {
-                            const values = [];
-                            let current = "";
-                            let inQuotes = false;
-
-                            for (let i = 0; i < line.length; i++)
-                            {
-                                   const char = line[i];
-
-                                   if (char === '"')
-                                   {
-                                          inQuotes = !inQuotes;
-                                   } else if (char === ',' && !inQuotes)
-                                   {
-                                          values.push(current);
-                                          current = "";
-                                   } else
-                                   {
-                                          current += char;
-                                   }
-                            }
-
-                            // Son değeri ekle
-                            values.push(current);
-                            return values;
-                     }
-
-                     // İlçe seçimini güncelle
-                     function updateDistricts()
-                     {
-                            // İlçe seçimini temizle
-                            districtSelect.innerHTML = '<option value="">Seçiniz</option>';
-
-                            const selectedCity = citySelect.value;
-                            if (!selectedCity) return;
-
-                            if (cities[selectedCity])
-                            {
-                                   // İlçeleri sırala
-                                   const districts = Array.from(cities[selectedCity]).sort();
-
-                                   // İlçe seçimini oluştur
-                                   districts.forEach(district =>
-                                   {
-                                          const option = document.createElement('option');
-                                          option.value = district;
-                                          option.textContent = district;
-                                          districtSelect.appendChild(option);
-                                   });
-
-                                   console.log(`${selectedCity} için ${districts.length} ilçe yüklendi`);
-                            } else
-                            {
-                                   console.warn(`${selectedCity} için ilçe bulunamadı`);
-                            }
-                     }
-
-                     // Eczane ara
-                     function searchPharmacies()
-                     {
-                            const selectedCity = citySelect.value;
-                            const selectedDistrict = districtSelect.value;
-
-                            if (!selectedCity)
-                            {
-                                   alert('Lütfen bir il seçin');
-                                   return;
-                            }
-
-                            console.log(`Arama: ${selectedCity} - ${selectedDistrict || "Tüm İlçeler"}`);
-
-                            // Filtreleme işlemi
-                            filteredPharmacies = allPharmacies.filter(pharmacy =>
-                            {
-                                   // Şehir kontrolü
-                                   if (pharmacy.city !== selectedCity) return false;
-
-                                   // İlçe seçilmişse kontrolü yap
-                                   if (selectedDistrict && pharmacy.district !== selectedDistrict) return false;
-
-                                   return true;
-                            });
-
-                            // Eczaneleri alfabetik olarak sırala
-                            filteredPharmacies.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-
-                            console.log(`${filteredPharmacies.length} eczane bulundu`);
-
-                            // Arama sonuçlarını göster
-                            currentPage = 1;
-                            displayResults();
-                     }
-
-                     // Sonuçları göster
-                     function displayResults()
-                     {
-                            // Liste temizleme
-                            pharmacyList.innerHTML = '';
-
-                            if (filteredPharmacies.length === 0)
-                            {
-                                   noResults.style.display = 'block';
-                                   loadMoreButton.classList.add('hidden');
-                                   return;
-                            }
-
-                            noResults.style.display = 'none';
-
-                            // Eğer currentPage -1 ise, tüm eczaneleri göster
-                            // Aksi takdirde sadece ilk sayfadaki eczaneleri göster
-                            const startIndex = 0;
-                            const endIndex = (currentPage === -1)
-                                   ? filteredPharmacies.length // Tüm eczaneler
-                                   : Math.min(ITEMS_PER_PAGE, filteredPharmacies.length); // İlk 6 eczane
-
-                            // Eczane kartlarını oluştur
-                            for (let i = startIndex; i < endIndex; i++)
-                            {
-                                   const pharmacy = filteredPharmacies[i];
-                                   const card = createPharmacyCard(pharmacy);
-                                   pharmacyList.appendChild(card);
-                            }
-
-                            // Daha fazla düğmesini göster/gizle
-                            if (currentPage === -1 || endIndex >= filteredPharmacies.length)
-                            {
-                                   loadMoreButton.classList.add('hidden');
-                            } else if (filteredPharmacies.length > ITEMS_PER_PAGE)
-                            {
-                                   loadMoreButton.classList.remove('hidden');
-                            } else
-                            {
-                                   loadMoreButton.classList.add('hidden');
-                            }
-                     }
-
-                     // Eczane kartı oluştur
-                     function createPharmacyCard(pharmacy)
-                     {
-                            const card = document.createElement('div');
-                            card.className = 'pharmacy-card';
-
-                            const name = document.createElement('h3');
-                            name.className = 'pharmacy-name';
-                            name.textContent = pharmacy.name;
-                            card.appendChild(name);
-
-                            if (pharmacy.address)
-                            {
-                                   const address = document.createElement('p');
-                                   address.className = 'pharmacy-address';
-                                   address.textContent = pharmacy.address;
-                                   card.appendChild(address);
-                            }
-
-                            const location = document.createElement('p');
-                            location.className = 'pharmacy-location';
-                            location.textContent = pharmacy.city + (pharmacy.district !== pharmacy.city ? ` - ${pharmacy.district}` : '');
-                            card.appendChild(location);
-
-                            if (pharmacy.phone)
-                            {
-                                   const phone = document.createElement('p');
-                                   phone.className = 'pharmacy-phone';
-                                   phone.textContent = pharmacy.phone;
-                                   card.appendChild(phone);
-                            }
-
-                            return card;
-                     }
-
-                     // Daha fazla eczane yükle
-                     function loadMorePharmacies()
-                     {
-                            // Tüm kalan eczaneleri göster
-                            currentPage = -1; // Özel değer: tümünü göster
-                            displayResults();
-                     }
+              return response.text();
+            })
+            .catch((error) => {
+              console.warn("Direkt erişimde hata, proxy deneniyor:", error);
+              // CORS hatası varsa proxy URL ile tekrar dene
+              return fetch(corsProxyUrl).then((response) => {
+                if (!response.ok) {
+                  throw new Error("Proxy ile de CSV dosyası yüklenemedi");
+                }
+                return response.text();
               });
-       </script>
-</body>
+            })
+            .then((data) => {
+              try {
+                parseCSV(data);
+                console.log("CSV verisi başarıyla yüklendi");
+              } catch (error) {
+                console.error("CSV ayrıştırma hatası:", error);
+                // Hata durumunda örnek veriler oluştur
+                createSampleData();
+              }
+            })
+            .catch((error) => {
+              console.error("Veri yüklenirken hata oluştu:", error);
+              // Dosya bulunamadıysa örnek veri oluştur
+              createSampleData();
+            });
+        }
 
+        // Örnek veri oluştur (CSV yüklenemediğinde)
+        function createSampleData() {
+          console.log("Örnek veri oluşturuluyor...");
+          allPharmacies = [];
+
+          // Her il için en az bir eczane ve ilçe ekle
+          TurkiyeIlleri.forEach((il) => {
+            // Her il için bir merkez ilçesi olsun
+            cities[il].add("MERKEZ");
+
+            // Bazı iller için ek ilçeler
+            if (
+              ["İSTANBUL", "ANKARA", "İZMİR", "BURSA", "ANTALYA"].includes(il)
+            ) {
+              YayginIlceler.forEach((ilce) => {
+                cities[il].add(ilce);
+              });
+            }
+
+            // Her il için en az bir eczane
+            allPharmacies.push({
+              name: `${il} Merkez Eczanesi`,
+              address: `${il} MERKEZ`,
+              city: il,
+              district: "MERKEZ",
+              phone: "0555 555 5555",
+            });
+
+            // Büyük iller için ek eczaneler
+            if (["İSTANBUL", "ANKARA", "İZMİR"].includes(il)) {
+              for (let i = 1; i <= 5; i++) {
+                const district = YayginIlceler[i % YayginIlceler.length];
+                allPharmacies.push({
+                  name: `${il} ${district} Eczanesi ${i}`,
+                  address: `${district} Mahallesi, ${il}`,
+                  city: il,
+                  district: district,
+                  phone: `0555 555 ${1000 + i}`,
+                });
+              }
+            }
+          });
+
+          console.log(`${allPharmacies.length} örnek eczane oluşturuldu`);
+        }
+
+        // CSV verilerini ayrıştır
+        function parseCSV(csv) {
+          const lines = csv.split("\n");
+
+          // Başlıkları al
+          const headerLine = lines[0].replace(/\r/g, "");
+          const headers = headerLine.split(",");
+
+          // Sütun indekslerini bul
+          const nameIndex = findIndex(headers, "Location_name");
+          const addressIndex = findIndex(headers, "Address");
+          const cityIndex = findIndex(headers, "City");
+          const phoneIndex = findIndex(headers, "Phone");
+
+          console.log("Sütun indeksleri:", {
+            nameIndex,
+            addressIndex,
+            cityIndex,
+            phoneIndex,
+          });
+
+          if (nameIndex === -1 || cityIndex === -1) {
+            throw new Error("Gerekli sütunlar bulunamadı");
+          }
+
+          // CSV satırlarını işle
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].replace(/\r/g, "");
+            if (!line.trim()) continue;
+
+            try {
+              // Basit CSV ayrıştırma
+              const values = parseCSVLine(line);
+
+              if (!values || values.length <= Math.max(nameIndex, cityIndex))
+                continue;
+
+              const name = cleanValue(values[nameIndex]);
+              const address =
+                addressIndex !== -1 ? cleanValue(values[addressIndex]) : "";
+              const city = cleanValue(values[cityIndex]);
+              const phone =
+                phoneIndex !== -1 ? cleanValue(values[phoneIndex]) : "";
+
+              if (name && city) {
+                // Adres yoksa district = city olur
+                const district = address || city;
+
+                // İl ve ilçe bilgisini güncelle
+                if (!cities[city]) {
+                  cities[city] = new Set();
+                }
+
+                if (district) {
+                  cities[city].add(district);
+                }
+
+                // Eczane ekle
+                allPharmacies.push({
+                  name,
+                  address,
+                  city,
+                  district,
+                  phone,
+                });
+              }
+            } catch (e) {
+              console.warn(`Satır ${i} ayrıştırılamadı:`, e);
+            }
+          }
+
+          console.log(`${allPharmacies.length} eczane yüklendi`);
+        }
+
+        // Değeri temizle
+        function cleanValue(value) {
+          if (!value) return "";
+          return value.replace(/^["']|["']$/g, "").trim();
+        }
+
+        // Başlıkta indeks bul
+        function findIndex(headers, name) {
+          for (let i = 0; i < headers.length; i++) {
+            const header = headers[i].replace(/^["']|["']$/g, "").trim();
+            if (header.toLowerCase() === name.toLowerCase()) {
+              return i;
+            }
+          }
+          return -1;
+        }
+
+        // Basit CSV satır ayrıştırma
+        function parseCSVLine(line) {
+          const values = [];
+          let current = "";
+          let inQuotes = false;
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === "," && !inQuotes) {
+              values.push(current);
+              current = "";
+            } else {
+              current += char;
+            }
+          }
+
+          // Son değeri ekle
+          values.push(current);
+          return values;
+        }
+
+        // İlçe seçimini güncelle
+        function updateDistricts() {
+          // İlçe seçimini temizle
+          districtSelect.innerHTML = '<option value="">Seçiniz</option>';
+
+          const selectedCity = citySelect.value;
+          if (!selectedCity) return;
+
+          if (cities[selectedCity]) {
+            // İlçeleri sırala
+            const districts = Array.from(cities[selectedCity]).sort();
+
+            // İlçe seçimini oluştur
+            districts.forEach((district) => {
+              const option = document.createElement("option");
+              option.value = district;
+              option.textContent = district;
+              districtSelect.appendChild(option);
+            });
+
+            console.log(
+              `${selectedCity} için ${districts.length} ilçe yüklendi`,
+            );
+          } else {
+            console.warn(`${selectedCity} için ilçe bulunamadı`);
+          }
+        }
+
+        // Eczane ara
+        function searchPharmacies() {
+          const selectedCity = citySelect.value;
+          const selectedDistrict = districtSelect.value;
+
+          if (!selectedCity) {
+            alert("Lütfen bir il seçin");
+            return;
+          }
+
+          console.log(
+            `Arama: ${selectedCity} - ${selectedDistrict || "Tüm İlçeler"}`,
+          );
+
+          // Filtreleme işlemi
+          filteredPharmacies = allPharmacies.filter((pharmacy) => {
+            // Şehir kontrolü
+            if (pharmacy.city !== selectedCity) return false;
+
+            // İlçe seçilmişse kontrolü yap
+            if (selectedDistrict && pharmacy.district !== selectedDistrict)
+              return false;
+
+            return true;
+          });
+
+          // Eczaneleri alfabetik olarak sırala
+          filteredPharmacies.sort((a, b) => a.name.localeCompare(b.name, "tr"));
+
+          console.log(`${filteredPharmacies.length} eczane bulundu`);
+
+          // Arama sonuçlarını göster
+          currentPage = 1;
+          displayResults();
+        }
+
+        // Sonuçları göster
+        function displayResults() {
+          // Liste temizleme
+          pharmacyList.innerHTML = "";
+
+          if (filteredPharmacies.length === 0) {
+            noResults.style.display = "block";
+            loadMoreButton.classList.add("hidden");
+            return;
+          }
+
+          noResults.style.display = "none";
+
+          // Eğer currentPage -1 ise, tüm eczaneleri göster
+          // Aksi takdirde sadece ilk sayfadaki eczaneleri göster
+          const startIndex = 0;
+          const endIndex =
+            currentPage === -1
+              ? filteredPharmacies.length // Tüm eczaneler
+              : Math.min(ITEMS_PER_PAGE, filteredPharmacies.length); // İlk 6 eczane
+
+          // Eczane kartlarını oluştur
+          for (let i = startIndex; i < endIndex; i++) {
+            const pharmacy = filteredPharmacies[i];
+            const card = createPharmacyCard(pharmacy);
+            pharmacyList.appendChild(card);
+          }
+
+          // Daha fazla düğmesini göster/gizle
+          if (currentPage === -1 || endIndex >= filteredPharmacies.length) {
+            loadMoreButton.classList.add("hidden");
+          } else if (filteredPharmacies.length > ITEMS_PER_PAGE) {
+            loadMoreButton.classList.remove("hidden");
+          } else {
+            loadMoreButton.classList.add("hidden");
+          }
+        }
+
+        // Eczane kartı oluştur
+        function createPharmacyCard(pharmacy) {
+          const card = document.createElement("div");
+          card.className = "pharmacy-card";
+
+          const name = document.createElement("h3");
+          name.className = "pharmacy-name";
+          name.textContent = pharmacy.name;
+          card.appendChild(name);
+
+          if (pharmacy.address) {
+            const address = document.createElement("p");
+            address.className = "pharmacy-address";
+            address.textContent = pharmacy.address;
+            card.appendChild(address);
+          }
+
+          const location = document.createElement("p");
+          location.className = "pharmacy-location";
+          location.textContent =
+            pharmacy.city +
+            (pharmacy.district !== pharmacy.city
+              ? ` - ${pharmacy.district}`
+              : "");
+          card.appendChild(location);
+
+          if (pharmacy.phone) {
+            const phone = document.createElement("p");
+            phone.className = "pharmacy-phone";
+            phone.textContent = pharmacy.phone;
+            card.appendChild(phone);
+          }
+
+          return card;
+        }
+
+        // Daha fazla eczane yükle
+        function loadMorePharmacies() {
+          // Tüm kalan eczaneleri göster
+          currentPage = -1; // Özel değer: tümünü göster
+          displayResults();
+        }
+      });
+    </script>
+  </body>
 </html>
