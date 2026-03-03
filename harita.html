@@ -506,12 +506,14 @@
           const addressIndex = findIndex(headers, "Address");
           const cityIndex = findIndex(headers, "City");
           const phoneIndex = findIndex(headers, "Phone");
+          const descriptionIndex = findIndex(headers, "Description");
 
           console.log("Sütun indeksleri:", {
             nameIndex,
             addressIndex,
             cityIndex,
             phoneIndex,
+            descriptionIndex,
           });
 
           if (nameIndex === -1 || cityIndex === -1) {
@@ -536,10 +538,16 @@
               const city = cleanValue(values[cityIndex]);
               const phone =
                 phoneIndex !== -1 ? cleanValue(values[phoneIndex]) : "";
+              const description =
+                descriptionIndex !== -1
+                  ? cleanValue(values[descriptionIndex])
+                  : "";
 
               if (name && city) {
-                // Adres yoksa district = city olur
+                // Adres yoksa district = city olur (filtreleme için)
                 const district = address || city;
+                // Kartta gösterilecek adres: Description varsa detaylı adres, yoksa ilçe
+                const displayAddress = description || address;
 
                 // İl ve ilçe bilgisini güncelle
                 if (!cities[city]) {
@@ -553,7 +561,7 @@
                 // Eczane ekle
                 allPharmacies.push({
                   name,
-                  address,
+                  address: displayAddress,
                   city,
                   district,
                   phone,
