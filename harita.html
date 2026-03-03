@@ -497,9 +497,9 @@
         function parseCSV(csv) {
           const lines = csv.split("\n");
 
-          // Başlıkları al
+          // Başlıkları al (parseCSVLine ile - virgüllü alanlar için tutarlı parse)
           const headerLine = lines[0].replace(/\r/g, "");
-          const headers = headerLine.split(",");
+          const headers = parseCSVLine(headerLine);
 
           // Sütun indekslerini bul
           const nameIndex = findIndex(headers, "Location_name");
